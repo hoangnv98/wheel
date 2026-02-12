@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vòng Quay May Mắn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+        }
+
+        /* Wheel Section */
+        .wheel-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3),
+                        inset 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 5px solid #fff;
+            overflow: hidden;
+        }
+
+        .wheel-text {
+            position: absolute;
+            font-size: 8px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.8), -1px -1px 1px rgba(0,0,0,0.8);
+            text-align: center;
+            white-space: nowrap;
+            transform-origin: center center;
+            pointer-events: none;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ff6b6b;
+            z-index: 10;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(145deg, #fff, #e0e0e0);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 5;
+        }
+
+        .spin-btn {
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(145deg, #ff6b6b, #ee5a5a);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+        }
+
+        .spin-btn:active {
+            transform: translateY(0);
+        }
+
+        .spin-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Result Display */
+        .result {
+            text-align: center;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #feca57;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #48dbfb;
+            text-align: center;
+        }
+
+        /* Item List */
+        .item-list {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 5px;
+        }
+
+        .item-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .item-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .item-list::-webkit-scrollbar-thumb {
+            background: #48dbfb;
+            border-radius: 3px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .item-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .item-name {
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+
+        .item-quantity {
+            font-size: 0.75rem;
+            color: #48dbfb;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .item-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            background: #48dbfb;
+            color: #fff;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: #fff;
+        }
+
+        .item-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Add Form */
+        .add-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: 2px solid #48dbfb;
+        }
+
+        .quantity-input {
+            width: 80px;
+            flex: none;
+            text-align: center;
+        }
+
+        .color-picker-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            border: 3px solid #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .color-picker-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .add-btn {
+            padding: 12px 20px;
+            background: linear-gradient(145deg, #00d2d3, #00b894);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 210, 211, 0.4);
+        }
+
+        .shuffle-btn {
+            padding: 12px 20px;
+            background: linear-gradient(145deg, #a55eea, #8854d0);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .shuffle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(165, 94, 234, 0.4);
+        }
+
+        /* Color Picker Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .color-picker-modal {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 350px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #48dbfb;
+            font-size: 1.2rem;
+        }
+
+        /* Color Wheel */
+        .color-wheel-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
+        }
+
+        .color-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                red, yellow, lime, aqua, blue, magenta, red
+            );
+            cursor: crosshair;
+            position: relative;
+        }
+
+        .color-wheel::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            border-radius: 50%;
+            background: radial-gradient(circle, white 0%, transparent 70%);
+        }
+
+        .color-indicator {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .brightness-slider {
+            width: 100%;
+            height: 20px;
+            border-radius: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #000, var(--slider-color, #ff0000), #fff);
+            margin-bottom: 20px;
+        }
+
+        .brightness-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #333;
+            cursor: pointer;
+        }
+
+        .color-preview {
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 3px solid #fff;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-btn {
+            background: #00d2d3;
+            color: #fff;
+        }
+
+        .cancel-btn {
+            background: #666;
+            color: #fff;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Winner Modal */
+        .winner-modal {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .winner-title {
+            font-size: 1.5rem;
+            color: #feca57;
+            margin-bottom: 20px;
+        }
+
+        .winner-name {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .winner-info {
+            font-size: 0.9rem;
+            color: #48dbfb;
+            margin-bottom: 10px;
+        }
+
+        .confetti {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .wheel-container {
+                width: 280px;
+                height: 280px;
+            }
+
+            .wheel-text {
+                font-size: 7px;
+            }
+
+            .center-circle {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .spin-btn {
+                padding: 12px 40px;
+                font-size: 1rem;
+            }
+
+            .control-panel {
+                padding: 15px;
+            }
+
+            .item-list {
+                max-height: 200px;
+            }
+
+            .color-wheel-container {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .wheel-text {
+                font-size: 6px;
+            }
+
+            .center-circle {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .pointer {
+                border-left: 12px solid transparent;
+                border-right: 12px solid transparent;
+                border-top: 25px solid #ff6b6b;
+            }
+
+            .spin-btn {
+                padding: 10px 30px;
+                font-size: 0.9rem;
+                letter-spacing: 1px;
+            }
+
+            .result {
+                padding: 10px 20px;
+            }
+
+            .result-text {
+                font-size: 1.1rem;
+            }
+
+            .control-panel {
+                padding: 12px;
+            }
+
+            .panel-title {
+                font-size: 1rem;
+            }
+
+            .item {
+                padding: 8px;
+            }
+
+            .item-color {
+                width: 25px;
+                height: 25px;
+            }
+
+            .item-name {
+                font-size: 0.85rem;
+            }
+
+            .item-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .form-input {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+
+            .quantity-input {
+                width: 60px;
+            }
+
+            .color-picker-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .add-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .color-picker-modal {
+                padding: 20px;
+            }
+
+            .color-wheel-container {
+                width: 180px;
+                height: 180px;
+            }
+
+            .color-preview {
+                height: 40px;
+            }
+
+            .modal-btn {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .winner-modal {
+                padding: 20px;
+            }
+
+            .winner-title {
+                font-size: 1.2rem;
+            }
+
+            .winner-name {
+                font-size: 1.5rem;
+                padding: 15px;
+            }
+
+            .confetti {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .wheel-container {
+                width: 220px;
+                height: 220px;
+            }
+
+            .wheel-text {
+                font-size: 5px;
+            }
+
+            .center-circle {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+
+            .color-wheel-container {
+                width: 160px;
+                height: 160px;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vòng Quay May Mắn</h1>
+        
+        <div class="main-content">
+            <!-- Wheel Section -->
+            <div class="wheel-section">
+                <div class="wheel-container">
+                    <div class="pointer"></div>
+                    <div class="wheel" id="wheel"></div>
+                    <div class="center-circle">🎯</div>
+                </div>
+                
+                <button class="spin-btn" id="spinBtn" onclick="spinWheel()">
+                    Quay Ngay!
+                </button>
+                
+                <div class="result">
+                    <span class="result-text" id="resultText">Nhấn nút để quay!</span>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <h2 class="panel-title">Quản Lý Mục</h2>
+                
+                <div class="item-list" id="itemList">
+                    <!-- Items will be rendered here -->
+                </div>
+
+                <div class="add-form">
+                    <div class="form-row">
+                        <input type="text" class="form-input" id="itemInput" placeholder="Nhập tên mục..." maxlength="20">
+                        <input type="number" class="form-input quantity-input" id="quantityInput" placeholder="SL" min="1" max="100" value="1">
+                    </div>
+                    <div class="form-row">
+                        <button class="color-picker-btn" id="colorPickerBtn" onclick="openColorPicker()"></button>
+                        <button class="add-btn" id="addBtn" onclick="addItem()" style="flex: 1;">Thêm Mục</button>
+                    </div>
+                    <button class="shuffle-btn" onclick="shuffleItems()">🔀 Xáo Trộn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div class="modal-overlay" id="colorPickerModal">
+        <div class="color-picker-modal">
+            <h3 class="modal-title">Chọn Màu Sắc</h3>
+            
+            <div class="color-wheel-container">
+                <div class="color-wheel" id="colorWheel"></div>
+                <div class="color-indicator" id="colorIndicator"></div>
+            </div>
+            
+            <input type="range" class="brightness-slider" id="brightnessSlider" min="0" max="100" value="50">
+            
+            <div class="color-preview" id="colorPreview"></div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" onclick="closeColorPicker()">Hủy</button>
+                <button class="modal-btn confirm-btn" onclick="confirmColor()">Chọn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winner Modal -->
+    <div class="modal-overlay" id="winnerModal">
+        <div class="winner-modal">
+            <div class="confetti">🎉</div>
+            <h3 class="winner-title">Kết Quả</h3>
+            <div class="winner-name" id="winnerName"></div>
+            <div class="winner-info" id="winnerInfo"></div>
+            <div class="modal-buttons" style="margin-top: 15px;">
+                <button class="modal-btn cancel-btn" onclick="closeWinnerModal()">Giữ lại</button>
+                <button class="modal-btn confirm-btn" id="removeWinnerBtn" onclick="removeWinnerItem()">Xóa mục này</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data - Màu sắc theo tiền Việt Nam
+        let items = [
+            { id: 1, name: '20000', color: '#656ea8', quantity: 20 },    // Xanh lơ đậm
+            { id: 2, name: '50000', color: '#bd7f8f', quantity: 10 },    // Xanh lam nhạt
+            { id: 3, name: '100000', color: '#366041', quantity: 5 },    // Xanh lá
+            { id: 4, name: '200000', color: '#b4575b', quantity: 4 },    // Đỏ nâu
+            { id: 5, name: '500000', color: '#7cb9c2', quantity: 2 }     // Xanh lơ tím sẫm
+        ];
+
+        let currentColor = '#ff6b6b';
+        let editingId = null;
+        let isSpinning = false;
+        let currentRotation = 0;
+        let lastWinner = null; // Store last winner for removal option
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderItems();
+            renderWheel();
+            updateColorPickerBtn();
+            setupColorWheel();
+        });
+
+        // Render item list
+        function renderItems() {
+            const itemList = document.getElementById('itemList');
+            
+            if (items.length === 0) {
+                itemList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>Chưa có mục nào. Thêm mục mới!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            itemList.innerHTML = items.map(item => `
+                <div class="item">
+                    <div class="item-color" style="background-color: ${item.color}"></div>
+                    <div class="item-info">
+                        <span class="item-name">${escapeHtml(item.name)}</span>
+                        <span class="item-quantity">Số lượng: ${item.quantity}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="item-btn edit-btn" onclick="editItem(${item.id})">✏️</button>
+                        <button class="item-btn delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get expanded items based on quantity - smart distribution to avoid adjacent same items
+        function getExpandedItems() {
+            if (items.length === 0) return [];
+            
+            // Create array with all items expanded by quantity
+            let allItems = [];
+            items.forEach(item => {
+                for (let i = 0; i < item.quantity; i++) {
+                    allItems.push({ ...item });
+                }
+            });
+            
+            // Distribute items to avoid 3 consecutive same values
+            let result = [];
+            let attempts = 0;
+            const maxAttempts = 1000;
+            
+            while (allItems.length > 0 && attempts < maxAttempts) {
+                attempts++;
+                
+                // Find valid candidates (not causing 3 consecutive same)
+                let validIndices = [];
+                for (let i = 0; i < allItems.length; i++) {
+                    if (canPlace(result, allItems[i])) {
+                        validIndices.push(i);
+                    }
+                }
+                
+                if (validIndices.length > 0) {
+                    // Pick random from valid candidates
+                    const randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
+                    result.push(allItems[randomIdx]);
+                    allItems.splice(randomIdx, 1);
+                    attempts = 0; // Reset attempts on success
+                } else {
+                    // No valid placement, try to swap with existing
+                    if (allItems.length > 0) {
+                        // Force place and continue (fallback)
+                        const randomIdx = Math.floor(Math.random() * allItems.length);
+                        result.push(allItems[randomIdx]);
+                        allItems.splice(randomIdx, 1);
+                    }
+                }
+            }
+            
+            // Also check wrap-around (first and last items)
+            result = fixWrapAround(result);
+            
+            return result;
+        }
+        
+        // Check if item can be placed without causing 3 consecutive same values
+        function canPlace(arr, item) {
+            if (arr.length < 2) return true;
+            
+            const last1 = arr[arr.length - 1];
+            const last2 = arr[arr.length - 2];
+            
+            // Don't allow 3 consecutive same names
+            if (last1.name === item.name && last2.name === item.name) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Fix wrap-around issues (check first items with last items)
+        function fixWrapAround(arr) {
+            if (arr.length < 4) return arr;
+            
+            let attempts = 0;
+            while (attempts < 100) {
+                // Check if last 2 + first 1 are same
+                const hasWrapIssue = (
+                    (arr[arr.length - 1].name === arr[0].name && arr[arr.length - 2].name === arr[0].name) ||
+                    (arr[arr.length - 1].name === arr[0].name && arr[0].name === arr[1].name)
+                );
+                
+                if (!hasWrapIssue) break;
+                
+                // Try to find a good swap position
+                let swapped = false;
+                for (let i = 2; i < arr.length - 2; i++) {
+                    if (arr[i].name !== arr[0].name && arr[i].name !== arr[arr.length - 1].name) {
+                        // Swap first element with this one
+                        [arr[0], arr[i]] = [arr[i], arr[0]];
+                        swapped = true;
+                        break;
+                    }
+                }
+                
+                if (!swapped) break;
+                attempts++;
+            }
+            
+            return arr;
+        }
+
+        // Shuffle items array (Fisher-Yates algorithm)
+        function shuffleItems() {
+            if (items.length <= 1) return;
+            
+            for (let i = items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [items[i], items[j]] = [items[j], items[i]];
+            }
+            
+            renderItems();
+            renderWheel();
+        }
+
+        // Render wheel - each item gets equal segment width regardless of quantity
+        // Quantity affects probability (more segments), not segment size
+        function renderWheel() {
+            const wheel = document.getElementById('wheel');
+            const expandedItems = getExpandedItems();
+            
+            if (expandedItems.length === 0) {
+                wheel.innerHTML = '';
+                wheel.style.background = '#333';
+                return;
+            }
+
+            // Total segments = total quantity of all items
+            const totalSegments = expandedItems.length;
+            const segmentAngle = 360 / totalSegments;
+            
+            let gradientParts = [];
+            
+            expandedItems.forEach((item, index) => {
+                const startAngle = index * segmentAngle;
+                const endAngle = (index + 1) * segmentAngle;
+                gradientParts.push(`${item.color} ${startAngle}deg ${endAngle}deg`);
+            });
+
+            wheel.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+            
+            // Add text labels - positioned at center of each segment
+            wheel.innerHTML = '';
+            const wheelSize = wheel.offsetWidth || 320;
+            const centerX = wheelSize / 2;
+            const centerY = wheelSize / 2;
+            // Position text at middle of segment (between center and edge)
+            const innerRadius = 25; // center circle radius
+            const outerRadius = wheelSize / 2;
+            const textRadius = (innerRadius + outerRadius) / 2; // Middle point
+            
+            expandedItems.forEach((item, index) => {
+                const textEl = document.createElement('div');
+                textEl.className = 'wheel-text';
+                
+                // Calculate angle to center of segment (0 degrees = top, clockwise)
+                const startAngle = index * segmentAngle;
+                const midAngle = (startAngle + segmentAngle / 2) - 90; // -90 to start from top
+                const angleRad = midAngle * Math.PI / 180;
+                
+                // Position text at center of segment
+                const x = centerX + Math.cos(angleRad) * textRadius;
+                const y = centerY + Math.sin(angleRad) * textRadius;
+                
+                // Display name
+                textEl.textContent = item.name;
+                
+                // Rotate text along the radius (pointing outward from center)
+                // Add 180 if on bottom half so text is always readable
+                let textRotation = midAngle;
+                if (midAngle > 0 && midAngle < 180) {
+                    textRotation = midAngle + 180; // Flip text on bottom half
+                }
+                
+                textEl.style.left = x + 'px';
+                textEl.style.top = y + 'px';
+                textEl.style.transform = `translate(-50%, -50%) rotate(${textRotation}deg)`;
+                
+                wheel.appendChild(textEl);
+            });
+        }
+
+        // Add item
+        function addItem() {
+            const input = document.getElementById('itemInput');
+            const quantityInput = document.getElementById('quantityInput');
+            const name = input.value.trim();
+            const quantity = parseInt(quantityInput.value) || 1;
+            
+            if (!name) {
+                input.focus();
+                return;
+            }
+
+            if (editingId) {
+                // Update existing item
+                const item = items.find(i => i.id === editingId);
+                if (item) {
+                    item.name = name;
+                    item.color = currentColor;
+                    item.quantity = Math.max(1, Math.min(100, quantity));
+                }
+                editingId = null;
+                document.getElementById('addBtn').textContent = 'Thêm Mục';
+            } else {
+                // Add new item
+                const newItem = {
+                    id: Date.now(),
+                    name: name,
+                    color: currentColor,
+                    quantity: Math.max(1, Math.min(100, quantity))
+                };
+                items.push(newItem);
+            }
+
+            input.value = '';
+            quantityInput.value = '1';
+            currentColor = getRandomColor();
+            updateColorPickerBtn();
+            renderItems();
+            renderWheel();
+        }
+
+        // Edit item
+        function editItem(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('itemInput').value = item.name;
+            document.getElementById('quantityInput').value = item.quantity;
+            currentColor = item.color;
+            updateColorPickerBtn();
+            editingId = id;
+            document.getElementById('addBtn').textContent = 'Cập Nhật';
+            document.getElementById('itemInput').focus();
+        }
+
+        // Delete item
+        function deleteItem(id) {
+            items = items.filter(i => i.id !== id);
+            
+            if (editingId === id) {
+                editingId = null;
+                document.getElementById('itemInput').value = '';
+                document.getElementById('quantityInput').value = '1';
+                document.getElementById('addBtn').textContent = 'Thêm Mục';
+            }
+            
+            renderItems();
+            renderWheel();
+        }
+
+        // Spin wheel
+        function spinWheel() {
+            const expandedItems = getExpandedItems();
+            if (isSpinning || expandedItems.length === 0) return;
+
+            isSpinning = true;
+            const spinBtn = document.getElementById('spinBtn');
+            const wheel = document.getElementById('wheel');
+            const resultText = document.getElementById('resultText');
+
+            spinBtn.disabled = true;
+            resultText.textContent = 'Đang quay...';
+
+            // Random spin
+            const spins = 5 + Math.random() * 5; // 5-10 full rotations
+            const extraDegrees = Math.random() * 360;
+            const totalRotation = currentRotation + (spins * 360) + extraDegrees;
+            
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            currentRotation = totalRotation;
+
+            // Calculate winner
+            setTimeout(() => {
+                const normalizedRotation = (360 - (totalRotation % 360)) % 360;
+                const segmentAngle = 360 / expandedItems.length;
+                const winnerIndex = Math.floor(normalizedRotation / segmentAngle);
+                const winner = expandedItems[winnerIndex];
+
+                resultText.textContent = winner.name;
+                lastWinner = winner; // Store winner for potential removal
+                showWinnerModal(winner);
+                
+                isSpinning = false;
+                spinBtn.disabled = false;
+            }, 4000);
+        }
+
+        // Color Picker
+        function setupColorWheel() {
+            const colorWheel = document.getElementById('colorWheel');
+            const indicator = document.getElementById('colorIndicator');
+            const brightnessSlider = document.getElementById('brightnessSlider');
+            
+            let isDragging = false;
+
+            function updateColor(e) {
+                const rect = colorWheel.getBoundingClientRect();
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                let x, y;
+                if (e.touches) {
+                    x = e.touches[0].clientX - rect.left;
+                    y = e.touches[0].clientY - rect.top;
+                } else {
+                    x = e.clientX - rect.left;
+                    y = e.clientY - rect.top;
+                }
+
+                const dx = x - centerX;
+                const dy = y - centerY;
+                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), centerX);
+                const angle = Math.atan2(dy, dx);
+                
+                const hue = ((angle * 180 / Math.PI) + 360) % 360;
+                const saturation = (distance / centerX) * 100;
+                const lightness = brightnessSlider.value;
+
+                currentColor = hslToHex(hue, saturation, lightness);
+                
+                // Update indicator position
+                const indicatorX = centerX + Math.cos(angle) * distance;
+                const indicatorY = centerY + Math.sin(angle) * distance;
+                indicator.style.left = indicatorX + 'px';
+                indicator.style.top = indicatorY + 'px';
+                indicator.style.backgroundColor = currentColor;
+                
+                updateColorPreview();
+            }
+
+            colorWheel.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                updateColor(e);
+            });
+
+            colorWheel.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                updateColor(e);
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) updateColor(e);
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    updateColor(e);
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            document.addEventListener('mouseup', () => isDragging = false);
+            document.addEventListener('touchend', () => isDragging = false);
+
+            brightnessSlider.addEventListener('input', () => {
+                updateColorPreview();
+            });
+        }
+
+        function openColorPicker() {
+            document.getElementById('colorPickerModal').classList.add('active');
+            updateColorPreview();
+            
+            // Position indicator at center initially
+            const colorWheel = document.getElementById('colorWheel');
+            const indicator = document.getElementById('colorIndicator');
+            const rect = colorWheel.getBoundingClientRect();
+            indicator.style.left = rect.width / 2 + 'px';
+            indicator.style.top = rect.height / 2 + 'px';
+            indicator.style.backgroundColor = currentColor;
+        }
+
+        function closeColorPicker() {
+            document.getElementById('colorPickerModal').classList.remove('active');
+        }
+
+        function confirmColor() {
+            updateColorPickerBtn();
+            closeColorPicker();
+        }
+
+        function updateColorPreview() {
+            document.getElementById('colorPreview').style.backgroundColor = currentColor;
+            document.getElementById('brightnessSlider').style.setProperty('--slider-color', currentColor);
+        }
+
+        function updateColorPickerBtn() {
+            document.getElementById('colorPickerBtn').style.backgroundColor = currentColor;
+        }
+
+        // Winner Modal
+        function showWinnerModal(winner) {
+            document.getElementById('winnerName').textContent = winner.name;
+            
+            // Find the item and show remaining quantity
+            const item = items.find(i => i.id === winner.id);
+            const remaining = item ? item.quantity : 0;
+            document.getElementById('winnerInfo').textContent = `Còn lại: ${remaining} phần`;
+            
+            // Show/hide remove button based on quantity
+            const removeBtn = document.getElementById('removeWinnerBtn');
+            if (remaining > 0) {
+                removeBtn.style.display = 'block';
+                removeBtn.textContent = remaining === 1 ? 'Xóa mục này' : 'Giảm 1 phần';
+            } else {
+                removeBtn.style.display = 'none';
+            }
+            
+            document.getElementById('winnerModal').classList.add('active');
+        }
+
+        function closeWinnerModal() {
+            document.getElementById('winnerModal').classList.remove('active');
+            lastWinner = null;
+        }
+        
+        // Remove or decrease winner item
+        function removeWinnerItem() {
+            if (!lastWinner) return;
+            
+            const item = items.find(i => i.id === lastWinner.id);
+            if (item) {
+                if (item.quantity > 1) {
+                    // Decrease quantity by 1
+                    item.quantity -= 1;
+                } else {
+                    // Remove item completely
+                    items = items.filter(i => i.id !== lastWinner.id);
+                }
+                
+                renderItems();
+                renderWheel();
+            }
+            
+            closeWinnerModal();
+        }
+
+        // Utility functions
+        function hslToHex(h, s, l) {
+            s /= 100;
+            l /= 100;
+            const a = s * Math.min(l, 1 - l);
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`;
+        }
+
+        function getRandomColor() {
+            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#00d2d3', '#5f27cd', '#ff9f43', '#10ac84', '#ee5a5a', '#0abde3'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Enter key to add item
+        document.getElementById('itemInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+
+        document.getElementById('quantityInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+
+        // Re-render wheel on window resize
+        window.addEventListener('resize', () => {
+            if (!isSpinning) {
+                renderWheel();
+            }
+        });
+    </script>
+</body>
+</html>
