@@ -29,7 +29,18 @@
             gap: 30px;
         }
 
-        h1 {
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 10px;
+            position: relative;
+            padding-left: 48px;
+            padding-right: 48px;
+        }
+
+        .app-header h1 {
             text-align: center;
             font-size: 2rem;
             background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
@@ -37,7 +48,13 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-shadow: none;
-            margin-bottom: 10px;
+            margin: 0;
+            flex: 1;
+        }
+
+        .app-header .menu-toggle-btn {
+            position: absolute;
+            left: 0;
         }
 
         .main-content {
@@ -166,21 +183,98 @@
             color: #feca57;
         }
 
+        /* Menu Toggle Button */
+        .menu-toggle-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        /* Control Panel Overlay */
+        .control-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+        }
+
+        .control-panel-overlay.active {
+            display: block;
+        }
+
         /* Control Panel */
         .control-panel {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px 20px 0 0;
             padding: 20px;
-            backdrop-filter: blur(10px);
-            width: 100%;
-            max-width: 400px;
+            padding-bottom: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+            z-index: 999;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-panel.active {
+            transform: translateY(0);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .panel-title {
             font-size: 1.2rem;
-            margin-bottom: 15px;
             color: #48dbfb;
-            text-align: center;
+            margin: 0;
+        }
+
+        .panel-close-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-close-btn:hover {
+            background: rgba(255, 107, 107, 0.5);
         }
 
         /* Item List */
@@ -623,10 +717,17 @@
             }
 
             .control-panel {
-                padding: 12px;
+                padding: 15px;
+                max-height: 65vh;
             }
 
             .panel-title {
+                font-size: 1rem;
+            }
+
+            .menu-toggle-btn {
+                width: 36px;
+                height: 36px;
                 font-size: 1rem;
             }
 
@@ -741,7 +842,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Vòng Quay May Mắn</h1>
+        <header class="app-header">
+            <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleControlPanel()">☰</button>
+            <h1>Vòng Quay May Mắn</h1>
+        </header>
         
         <div class="main-content">
             <!-- Wheel Section -->
@@ -760,26 +864,30 @@
                     <span class="result-text" id="resultText">Nhấn nút để quay!</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Control Panel -->
-            <div class="control-panel">
+        <!-- Control Panel (Slide-up) -->
+        <div class="control-panel-overlay" id="controlPanelOverlay" onclick="closeControlPanel()"></div>
+        <div class="control-panel" id="controlPanel">
+            <div class="panel-header">
                 <h2 class="panel-title">Quản Lý Mục</h2>
-                
-                <div class="item-list" id="itemList">
-                    <!-- Items will be rendered here -->
-                </div>
+                <button class="panel-close-btn" onclick="closeControlPanel()">✕</button>
+            </div>
+            
+            <div class="item-list" id="itemList">
+                <!-- Items will be rendered here -->
+            </div>
 
-                <div class="add-form">
-                    <div class="form-row">
-                        <input type="text" class="form-input" id="itemInput" placeholder="Nhập tên mục..." maxlength="20">
-                        <input type="number" class="form-input quantity-input" id="quantityInput" placeholder="SL" min="1" max="100" value="1">
-                    </div>
-                    <div class="form-row">
-                        <button class="color-picker-btn" id="colorPickerBtn" onclick="openColorPicker()"></button>
-                        <button class="add-btn" id="addBtn" onclick="addItem()" style="flex: 1;">Thêm Mục</button>
-                    </div>
-                    <button class="shuffle-btn" onclick="shuffleItems()">🔀 Xáo Trộn</button>
+            <div class="add-form">
+                <div class="form-row">
+                    <input type="text" class="form-input" id="itemInput" placeholder="Nhập tên mục..." maxlength="20">
+                    <input type="number" class="form-input quantity-input" id="quantityInput" placeholder="SL" min="1" max="100" value="1">
                 </div>
+                <div class="form-row">
+                    <button class="color-picker-btn" id="colorPickerBtn" onclick="openColorPicker()"></button>
+                    <button class="add-btn" id="addBtn" onclick="addItem()" style="flex: 1;">Thêm Mục</button>
+                </div>
+                <button class="shuffle-btn" onclick="shuffleItems()">🔀 Xáo Trộn</button>
             </div>
         </div>
     </div>
@@ -842,6 +950,24 @@
             updateColorPickerBtn();
             setupColorWheel();
         });
+
+        // Control Panel Toggle
+        function toggleControlPanel() {
+            const panel = document.getElementById('controlPanel');
+            const overlay = document.getElementById('controlPanelOverlay');
+            panel.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function openControlPanel() {
+            document.getElementById('controlPanel').classList.add('active');
+            document.getElementById('controlPanelOverlay').classList.add('active');
+        }
+
+        function closeControlPanel() {
+            document.getElementById('controlPanel').classList.remove('active');
+            document.getElementById('controlPanelOverlay').classList.remove('active');
+        }
 
         // Render item list
         function renderItems() {
